@@ -5,6 +5,7 @@ import CircularBox from '../components/CircularBox';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Header from '../components/Header';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import LoadingScreen from './LoadingScreen';
 
 const Dashboard = () => {
   const navigation = useNavigation();
@@ -30,7 +31,7 @@ const Dashboard = () => {
   );
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <LoadingScreen />;
   }
 
   return (

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../../FirebaseConfig'; 
+import { auth } from '../../FirebaseConfig'; 
 import { useNavigation } from '@react-navigation/native';
+import Header from '../components/Header';
 
 const Login = () => {
     const navigation = useNavigation();
@@ -15,7 +16,7 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+            await signInWithEmailAndPassword(auth, email, password);
             setLoading(false);
             navigation.navigate('HomeTabs'); 
         } catch (error) {
@@ -28,6 +29,7 @@ const Login = () => {
 
     return (
         <View style={styles.container}>
+            <Header></Header>
             <Text style={styles.title}>Login</Text>
             <TextInput
                 style={styles.input}
@@ -61,6 +63,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#fff',
     },
     title: {
         fontSize: 24,

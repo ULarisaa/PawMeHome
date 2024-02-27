@@ -12,14 +12,14 @@ const LogoHeader = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 120, // Adjust the height as needed
+    height: 170, // Adjust the height as needed
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff', // Optional: change the background color as needed
   },
   logo: {
-    width: 300, // Adjust the width as per your logo's aspect ratio
-    height: 150, // Adjust the height as per your logo's aspect ratio
+    width: 400, // Adjust the width as per your logo's aspect ratio
+    height: 180, // Adjust the height as per your logo's aspect ratio
     resizeMode: 'contain', // Ensures the logo scales nicely
   },
 });

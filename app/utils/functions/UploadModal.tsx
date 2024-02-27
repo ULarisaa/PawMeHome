@@ -36,10 +36,15 @@ const UploadModal: React.FC<UploadModalProps> = ({
           return;
         }
       
-        const result = await ImagePicker.launchImageLibraryAsync();
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images, // Specify media type options here
+          allowsEditing: true, // Optional: if you want to allow editing
+          aspect: [4, 3], // Optional: aspect ratio
+          quality: 1, // Optional: specify the quality of the image
+        });
       
         if (!result.canceled && result.assets) {
-          onImageSelect(result.assets[0].uri); // Correctly accessing the uri
+          onImageSelect(result.assets[0].uri);
         }
       };
       

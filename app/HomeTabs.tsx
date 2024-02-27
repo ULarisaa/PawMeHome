@@ -9,7 +9,8 @@ import Settings from './screens/Settings';
 import PawIcon from './utils/images/PawIcon';
 import { useNavigation } from '@react-navigation/native';
 import { primary } from './utils/colors';
-
+import { signOut } from 'firebase/auth';
+import { auth } from '../FirebaseConfig';
 
 
 const Tab = createBottomTabNavigator();
@@ -28,12 +29,19 @@ function HomeTabs() {
       { 
         text: "OK", 
         onPress: () => {
-          console.log("OK Pressed");
-          navigation.navigate('Login'); 
+          signOut(auth).then(() => {
+            // Sign-out successful.
+            console.log("User logged out");
+            navigation.navigate('Login');
+          }).catch((error) => {
+            // An error happened.
+            console.error("Logout error:", error);
+          });
         } 
       }
     ]);
   };
+  
   
 
   return (
@@ -65,20 +73,22 @@ function HomeTabs() {
       <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Settings" component={Settings} />
       <Tab.Screen
-        name="Logout"
-        component={() => null} // No component for Logout
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault(); // Prevent default action
-            handleLogout(); // Trigger logout action
-          },
-        }}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="log-out-outline" size={iconSize} color={color} />
-          ),
-        }}
-      />
+      name="Logout"
+      component={() => null} // Keep this to satisfy the requirement of having a component.
+      listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          e.preventDefault(); // Prevent the default action (navigation)
+          handleLogout(); // Execute your logout function
+        },
+      })}
+      options={{
+        tabBarIcon: ({ color }) => (
+          <Ionicons name="log-out-outline" size={iconSize} color={color} />
+        ),
+      }}
+    />
+
+
     </Tab.Navigator>
   );
 }

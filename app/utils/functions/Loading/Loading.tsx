@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, View, Image, StyleSheet } from 'react-native';
+import { useDynamicStyles } from './styles';
 
 const LoadingScreen = () => {
+    const styles = useDynamicStyles(); // Folosește hook-ul pentru a obține stilurile adaptate
     const [fillAnimation] = useState(new Animated.Value(0)); // Starts empty
 
     useEffect(() => {
@@ -10,7 +12,7 @@ const LoadingScreen = () => {
             Animated.timing(fillAnimation, {
                 toValue: 1, // Fill down
                 duration: 1500, // Duration 3 seconds
-                useNativeDriver: false, // 'height' is not supported by native driver
+                useNativeDriver: false, 
             }),
             Animated.timing(fillAnimation, {
                 toValue: 0, // Disappear upwards
@@ -19,19 +21,20 @@ const LoadingScreen = () => {
             }),
         ]);
 
-        // Loop the sequence indefinitely
+
         Animated.loop(animationSequence).start();
     }, [fillAnimation]);
 
     const coverHeight = fillAnimation.interpolate({
         inputRange: [0, 1],
-        outputRange: ['100%', '0%'], // Starts full, ends empty
+        outputRange: ['100%', '0%'], 
     });
+    
 
     return (
         <View style={styles.container}>
             <View style={styles.logoContainer}>
-                <Image source={require('./../utils/images/paw.png')} style={styles.logo} />
+                <Image source={require('../../images/paw.png')} style={styles.logo} />
                 <Animated.View style={[styles.cover, { height: coverHeight }]} />
             </View>
         </View>
@@ -40,29 +43,4 @@ const LoadingScreen = () => {
 
 export default LoadingScreen;
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFF', // Or any background color you prefer
-    },
-    logoContainer: {
-        width: 150, // Adjust based on your logo's size
-        height: 150, // Adjust based on your logo's size
-        overflow: 'hidden',
-        position: 'relative',
-    },
-    logo: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-    },
-    cover: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#FFF', 
-    },
-});
+

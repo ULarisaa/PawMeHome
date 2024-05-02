@@ -1,48 +1,75 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Alert, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MyProfile from './screens/MyProfile';
-import AddPet from './screens/AddPet';
-import Dashboard from './screens/Dashboard';
-import Settings from './screens/Settings';
-import PawIcon from './utils/images/PawIcon';
+import AddPet from './screens/AddPet/AddPet';
+import Dashboard from './screens/Dashboard/Dashboard';
+import Settings from './screens/Settings/Settings';
+import Notifications from './screens/Notifications/Notifications';
 import { useNavigation } from '@react-navigation/native';
-import { primary } from './utils/colors';
-import { signOut } from 'firebase/auth';
-import { auth } from '../FirebaseConfig';
-
+import { Colors } from './utils/colors';
+import DashboardNavigator from './screens/Dashboard/DashboardNavigator';
+import { useColorScheme } from './utils/ColorSchemeContext';
+import { SERVER_URL } from './utils/consts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './utils/functions/AuthContext';
 
 const Tab = createBottomTabNavigator();
-const iconSize = 30; // Define a constant size for all icons
+const iconSize = 30;
+
+const fetchUnreadNotificationsCount = async () => {
+  try {
+    const response = await fetch(`${SERVER_URL}/notifications/unreadCount`);
+    const data = await response.json();
+    return data.count;
+  } catch (error) {
+    console.error('Error fetching notifications count:', error);
+    return 0;
+  }
+};
+
+const NotificationIcon = ({ focused, color, notificationCount, onPress }) => (
+  <TouchableOpacity onPress={onPress}>
+    <View>
+      <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={iconSize} color={color} />
+      {notificationCount > 0 && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{notificationCount}</Text>
+        </View>
+      )}
+    </View>
+  </TouchableOpacity>
+);
 
 function HomeTabs() {
+  const scheme = useColorScheme(); 
   const navigation = useNavigation();
+  const [notificationCount, setNotificationCount] = useState(0);
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel"
-      },
-      { 
-        text: "OK", 
-        onPress: () => {
-          signOut(auth).then(() => {
-            // Sign-out successful.
-            console.log("User logged out");
-            navigation.navigate('Login');
-          }).catch((error) => {
-            // An error happened.
-            console.error("Logout error:", error);
-          });
-        } 
-      }
-    ]);
-  };
+  useEffect(() => {
+    const fetchCount = async () => {
+      const count = await fetchUnreadNotificationsCount();
+      setNotificationCount(count);
+    };
   
+    fetchCount();
   
+    const interval = setInterval(fetchCount, 1000); // Verifică la fiecare 10 secunde
+  
+    return () => clearInterval(interval); // Curăță intervalul la demontarea componentei
+  }, []);
+  
+
+
+  const handleLogout = async () => {
+    try {
+        await logout();
+        navigation.navigate('Login'); // Presupunând că 'Login' este numele rutei către pagina de login
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+};
 
   return (
     <Tab.Navigator
@@ -50,47 +77,72 @@ function HomeTabs() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarIcon: ({ focused, color }) => {
-          let iconName;
-          if (route.name === 'MyProfile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'AddPet') {
-            iconName = focused ? 'add-circle' : 'add-circle-outline';
-          } else if (route.name === 'Dashboard') {
-            return <PawIcon color={color} size={iconSize} />;
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          } else if (route.name === 'Logout') {
-            iconName = 'log-out-outline';
+          switch (route.name) {
+            case 'Dashboard':
+              return <Ionicons name={focused ? 'paw' : 'paw-outline'} size={iconSize} color={color} />;
+              case 'Notifications':
+                return (
+                  <NotificationIcon
+                    focused={focused}
+                    color={color}
+                    notificationCount={notificationCount}
+                    onPress={() => navigation.navigate('Notifications')} // Adaugă această linie
+                  />
+                );
+            case 'AddPet':
+              return <Ionicons name={focused ? 'add-circle' : 'add-circle-outline'} size={iconSize} color={color} />;
+            case 'Settings':
+              return <Ionicons name={focused ? 'settings' : 'settings-outline'} size={iconSize} color={color} />;
+            case 'Logout':
+              return <Ionicons name="log-out-outline" size={iconSize} color={color} />;
+            default:
+              return null;
           }
-          return <Ionicons name={iconName} size={iconSize} color={color} />;
         },
-        tabBarActiveTintColor: primary,
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: Colors[scheme].primary,
+        tabBarInactiveTintColor: Colors[scheme].inactive,
+        tabBarStyle: {
+          backgroundColor: Colors[scheme].menu // Culoarea de fundal a tab bar-ului bazată pe schema
+        },
       })}
     >
-      <Tab.Screen name="MyProfile" component={MyProfile} />
+      <Tab.Screen name="Notifications" component={Notifications} />
       <Tab.Screen name="AddPet" component={AddPet} />
-      <Tab.Screen name="Dashboard" component={Dashboard} />
+      <Tab.Screen name="Dashboard" component={DashboardNavigator} />
       <Tab.Screen name="Settings" component={Settings} />
       <Tab.Screen
-      name="Logout"
-      component={() => null} // Keep this to satisfy the requirement of having a component.
-      listeners={({ navigation }) => ({
-        tabPress: (e) => {
-          e.preventDefault(); // Prevent the default action (navigation)
-          handleLogout(); // Execute your logout function
-        },
-      })}
-      options={{
-        tabBarIcon: ({ color }) => (
-          <Ionicons name="log-out-outline" size={iconSize} color={color} />
-        ),
-      }}
-    />
-
-
+        name="Logout"
+        component={View} 
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            handleLogout();
+          },
+        }}
+        options={{
+          tabBarIcon: ({ color }) => <Ionicons name="log-out-outline" size={iconSize} color={color} />,
+        }}
+      />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    right: -6,
+    top: -3,
+    backgroundColor: 'red',
+    borderRadius: 6,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+  },
+});
 
 export default HomeTabs;

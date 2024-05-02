@@ -1,36 +1,32 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../FirebaseConfig'; 
-import { useNavigation } from '@react-navigation/native';
-import Header from '../components/Header';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../../FirebaseConfig';
+import withDefaultMargins from '../../utils/Margins';
 
-const Login = () => {
-    const navigation = useNavigation();
+const ForgotPassword = () => {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-    const handleLogin = async () => {
+    const handleResetPassword = async () => {
         setLoading(true);
+        setMessage('');
         setError('');
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            await sendPasswordResetEmail(auth, email);
             setLoading(false);
-            navigation.navigate('HomeTabs'); 
+            setMessage('Check your email to reset your password.');
         } catch (error) {
             setError(error.message);
             setLoading(false);
         }
     };
-    
-    
 
     return (
         <View style={styles.container}>
-            <Header></Header>
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Reset Password</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -39,26 +35,27 @@ const Login = () => {
                 autoCapitalize="none"
                 keyboardType="email-address"
             />
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
             {loading ? (
                 <ActivityIndicator />
             ) : (
-                <TouchableOpacity onPress={handleLogin} style={styles.button}>
-                    <Text style={styles.buttonText}>Log In</Text>
+                <TouchableOpacity onPress={handleResetPassword} style={styles.button}>
+                    <Text style={styles.buttonText}>Send Reset Email</Text>
                 </TouchableOpacity>
             )}
+            {message ? <Text style={styles.messageText}>{message}</Text> : null}
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
     );
 };
 
+
 const styles = StyleSheet.create({
+    linkButton: {
+        marginTop: 10,
+    },
+    linkText: {
+        color: 'blue',
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -93,4 +90,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Login;
+
+export default withDefaultMargins(ForgotPassword);

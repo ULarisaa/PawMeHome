@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
     height: 170, // Adjust the height as needed
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff', // Optional: change the background color as needed
   },
   logo: {
     width: 400, // Adjust the width as per your logo's aspect ratio

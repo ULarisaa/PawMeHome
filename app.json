@@ -1,34 +1,37 @@
 {
   "expo": {
     "name": "PawMeHome",
-    "slug": "PawMeHome",
+    "slug": "pawmehome",
+    "projectId": "7dc185ec-fe57-4bd6-afc1-dd4f7aa6eb43",
+    "owner": "larisau10",
+    "scheme": "pawmehome",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "icon": "./app/utils/images/paw.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./app/utils/images/paw.png",
+      "resizeMode": "contain", 
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.app.PawMeHome",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app requires your location to show you nearby points of interest."
-      }
+        "NSLocationWhenInUseUsageDescription": "This app requires your location to show you nearby points of interest.",
+        "CFBundleURLTypes": [{
+          "CFBundleURLSchemes": ["com.googleusercontent.apps.27946158150-avc5iefheitgdejtv5os4i5p09jbhpfp"]
+        }]
+      },
+      
     },
     "android": {
+      "package": "com.app.PawMeHome",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": ["ACCESS_FINE_LOCATION"]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

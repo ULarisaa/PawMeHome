@@ -1,49 +1,88 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View, StatusBar } from 'react-native';
+import { AuthProvider, useAuth } from './app/utils/functions/AuthContext';
+import { ColorSchemeProvider } from './app/utils/ColorSchemeContext';
+import { useNotificationToken } from './app/utils/functions/NotificationTokenContext';
+import { navigationRef, navigate } from './app/utils/functions/NavigationServices';
+import Login from './app/screens/Login/Login';
+import SignUp from './app/screens/Login/SignUp';
 import HomeTabs from './app/HomeTabs';
-import Login from './app/screens/Login';
-import PetProfile from './app/screens/PetProfile'; // Import the PetProfile component
-import { AuthProvider, useAuth } from './app/utils/functions/AuthContext'
-import LoadingScreen from './app/screens/LoadingScreen';
+import * as Notifications from 'expo-notifications';
+import { registerForPushNotificationsAsync } from './app/utils/functions/pushNotificationSetup'; // Adjust this import path to where you manage notification setup
 
 const Stack = createNativeStackNavigator();
 
-const AppStack = () => {
-  const { currentUser, loading } = useAuth();
-
-  // Optionally, you could add a loading state here
-  if (loading) {
-    return <LoadingScreen />; // Corrected the return statement here
-  }
-
-  return (
-    <>
-      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-      <Stack.Navigator>
-        {currentUser ? (
-          <>
-            <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
-            <Stack.Screen name="PetProfile" component={PetProfile} options={{ headerShown: true }} />
-          </>
-        ) : (
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-        )}
-      </Stack.Navigator>
-    </>
-  );
-};
-
 function App() {
+  const { setExpoPushToken } = useNotificationToken();
+
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+        setExpoPushToken(token); // This will save the token in the context and AsyncStorage
+      }
+    };
+
+    setupNotifications();
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    const notificationSubscription = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification Received:', notification);
+    });
+
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification Response Received:', response);
+      const notificationData = response.notification.request.content.data;
+      if (notificationData && notificationData.targetScreen === 'Notifications') {
+        navigate('Notifications', { selectedType: notificationData.selectedType });
+      }
+    });
+
+    // Return a cleanup function to remove subscriptions when the component unmounts
+    return () => {
+      notificationSubscription.remove();
+      responseSubscription.remove();
+    };
+  }, []);
+
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <AppStack />
-      </NavigationContainer>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <ColorSchemeProvider>
+          <NavigationContainer ref={navigationRef}>
+            <MyStack />
+          </NavigationContainer>
+        </ColorSchemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
 
-export default App;
+const MyStack = () => {
+  const { currentUser } = useAuth();
 
+  return (
+    <Stack.Navigator>
+      {currentUser ? (
+        <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+          <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+          <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+};
+
+export default App;

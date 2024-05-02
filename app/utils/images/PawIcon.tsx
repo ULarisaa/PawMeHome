@@ -11,4 +11,5 @@ const PawIcon = ({color=primary, size = 24}) => (
   </Svg>
 );
 
+
 export default PawIcon;

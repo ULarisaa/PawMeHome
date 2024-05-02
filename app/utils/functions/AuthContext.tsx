@@ -1,34 +1,104 @@
-// AuthContext.js or AuthProvider.js
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SERVER_URL } from '../consts';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../../../FirebaseConfig'; // Ensure this path is correct
-import { onAuthStateChanged } from 'firebase/auth';
+// Define the type for the user's data
+interface User {
+  token: string;
+}
 
-const AuthContext = createContext();
+// Define the type for the context state
+interface AuthContextType {
+  currentUser: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  loading: boolean;
+}
 
-export const useAuth = () => useContext(AuthContext);
+// Create the context with an undefined default value
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+// Define the type for the AuthProvider's props
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This function automatically unsubscribes from the auth state listener when the component unmounts
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+    const checkLoginStatus = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        setCurrentUser({ token });
+      }
       setLoading(false);
-    });
+    };
 
-    return unsubscribe; // Clean up the subscription
+    checkLoginStatus();
   }, []);
 
-  const value = {
-    currentUser,
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${SERVER_URL}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error('Login failed');
+      const data = await response.json();
+      if (data.token) {
+        await AsyncStorage.setItem('userToken', data.token);
+        setCurrentUser({ token: data.token });
+      } else {
+        throw new Error('No token received');
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const signup = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${SERVER_URL}/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error('Signup failed');
+      const data = await response.json();
+      if (data.token) {
+        await AsyncStorage.setItem('userToken', data.token);
+        setCurrentUser({ token: data.token });
+      } else {
+        throw new Error('No token received');
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem('userToken');
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ currentUser, login, signup, logout, loading }}>
+      {children}
     </AuthContext.Provider>
   );
+};
+
+// Hook to use the authentication context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

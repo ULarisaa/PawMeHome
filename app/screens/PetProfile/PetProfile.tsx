@@ -13,6 +13,7 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { FontAwesome5 } from 'react-native-vector-icons';
 import { primary } from '../../utils/colors';
 import EventCalendar from '../../components/Calendar';
+import EventCalendarWithTimeline from '../../components/Calendar';
 
 
 
@@ -28,8 +29,7 @@ const PetProfile = () => {
     const [loadingMap, setLoadingMap] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const isSelected = (section) => activeSection === section;
-    const [futureEvents, setFutureEvents] = useState([]);
-    const [pastEvents, setPastEvents] = useState([]);
+
     const [events, setEvents] = useState([]);
     
 
@@ -37,27 +37,23 @@ const PetProfile = () => {
       setSearchQuery(text.toLowerCase());
     };
 
-    
     const fetchEventsForPet = async (petId) => {
       try {
           const response = await fetch(`${SERVER_URL}/events/pets/${petId}`);
-          const { futureEvents, pastEvents } = await response.json();
-          console.log('Evenimente', futureEvents);
-          const allEvents = [...json.futureEvents, ...json.pastEvents];
-          setEvents(allEvents);
-          setFutureEvents(futureEvents);
-          setPastEvents(pastEvents);
+          const { allEvents } = await response.json(); // Extrage allEvents din răspuns
+    
+          setEvents(allEvents); // Actualizează starea cu toate evenimentele
       } catch (err) {
-          console.error('Error fetching events:', err);
+          console.error('Error fetching events:', err); // Loghează orice eroare
       }
-  };
-
+    };
+    
   // Folosește efectul pentru a încărca evenimentele când componenta este montată sau când petId se schimbă
   useEffect(() => {
     if (petId) { // Verifică dacă petId este definit
         fetchEventsForPet(petId);
     }
-}, [petId]); // Adaugă petId în lista de dependințe
+}, []); // Adaugă petId în lista de dependințe
 
     useEffect(() => {
       const fetchPet = async () => {
@@ -125,6 +121,49 @@ const PetProfile = () => {
       })();
     }, [pet]); // Dependența este 'pet', astfel încât acest efect să se ruleze din nou atunci când 'pet' se schimbă
     
+
+    const handleDeletePet = () => {
+      Alert.alert(
+        'Delete Profile',
+        'Are you sure you want to delete this profile?',
+        [
+          { 
+            text: 'Cancel',
+            onPress: () => console.log('Delete cancelled'),
+            style: 'cancel',
+          },
+          { 
+            text: 'Delete', 
+            onPress: () => deleteProfile(petId),
+            style: 'destructive'
+          }
+        ],
+        { cancelable: true }
+      );
+    };
+  
+    const deleteProfile = async (id) => {
+      console.log('Deleting profile...');
+      try {
+        const response = await fetch(`${SERVER_URL}/pets/${petId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include aici orice alte headere necesare, de exemplu un token de autentificare
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to delete the profile.');
+        }
+  
+        console.log('Profile deleted successfully!');
+        navigation.navigate('DashboardScreen'); // Navigăm înapoi la Dashboard după ștergerea cu succes
+      } catch (error) {
+        console.error('Error deleting profile:', error);
+      }
+    };
+  
     const formatDistance = (distance) => {
       if (distance < 1) {
         // Dacă distanța este mai mică de 1 km, o convertim în metri și rotunjim la cel mai apropiat întreg
@@ -222,7 +261,7 @@ const PetProfile = () => {
                 
                 return (
                   <View style={{ flex: 1 }}>
-                  <EventCalendar events={events} />
+                  <EventCalendarWithTimeline petId={petId} />
                 </View>
                 );
               
@@ -248,6 +287,10 @@ const PetProfile = () => {
                         <FontAwesome5 name="dog" size={22} color="white" />
                         <Text style={styles.createtext}>Start Walking</Text>
                       </TouchableOpacity>
+                      <TouchableOpacity style={styles.create} onPress={handleDeletePet}>
+                        <FontAwesome5 name="trash" size={22} color="white" />
+                        <Text style={styles.createtext}>Delete Profile</Text>
+                      </TouchableOpacity>
                      
 
                     </View>
@@ -268,16 +311,25 @@ const PetProfile = () => {
   function calculateAge(birthdate) {
     const birthDate = new Date(birthdate);
     const today = new Date();
+    
     let years = today.getFullYear() - birthDate.getFullYear();
     let months = today.getMonth() - birthDate.getMonth();
+    let days = today.getDate() - birthDate.getDate();
   
-    if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+    // Adjust months for past month
+    if (days < 0) {
+      months--;
+    }
+  
+    // If months negative after adjustment, adjust years and set months to positive
+    if (months < 0) {
       years--;
       months += 12;
     }
   
+    // Generate age string based on years and months calculated
     if (years === 0) {
-      return `${months} months`;
+      return `${months} month${months !== 1 ? 's' : ''}`;
     } else if (years === 1 && months === 0) {
       return `${years} year`;
     } else if (years === 1 && months !== 0) {
@@ -304,34 +356,38 @@ const PetProfile = () => {
       <View style={{ flexDirection: 'row', padding: 10, alignItems: 'center' }}>
         <Image source={{ uri: pet.imageUrl }} style={{ width: 150, height: 150, borderRadius: 100 }} />
         
-              <View style={{ marginLeft: 20 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <FontAwesome5 name="paw" size={16} color="white" />
-          <Text style={{ marginLeft: 5, fontSize: 16, lineHeight: 20, color: 'white' }}>{pet.name}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-          <FontAwesome5 name="birthday-cake" size={16} color="white" />
-          <Text style={{ marginLeft: 5, fontSize: 16, lineHeight: 20, color: 'white' }}>
-            {formatDate(pet.birthdate)}
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-          <FontAwesome5 name="hourglass-half" size={16} color="white" />
-          <Text style={{ marginLeft: 5, fontSize: 16, lineHeight: 20, color: 'white' }}>
-            {calculateAge(pet.birthdate)}
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-          {pet.sex === 'male' ? (
-            <FontAwesome5 name="mars" size={16} color="white" />
-          ) : (
-            <FontAwesome5 name="venus" size={16} color="white" />
-          )}
-          <Text style={{ marginLeft: 5, fontSize: 16, lineHeight: 20, color: 'white' }}>{pet.breed}</Text>
-        </View>
-
-        </View>
-      </View>
+        <View style={{ marginLeft: 20 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <FontAwesome5 name="paw" size={16} color={styles.iconColor.color} />
+                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                            {pet.name}
+                        </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                        <FontAwesome5 name="birthday-cake" size={16} color={styles.iconColor.color} />
+                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                            {formatDate(pet.birthdate)}
+                        </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                        <FontAwesome5 name="hourglass-half" size={16} color={styles.iconColor.color} />
+                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                            {calculateAge(pet.birthdate)}
+                        </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                        {pet.sex === 'male' ? (
+                            <FontAwesome5 name="mars" size={16} color={styles.iconColor.color} />
+                        ) : (
+                            <FontAwesome5 name="venus" size={16} color={styles.iconColor.color} />
+                        )}
+                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                            {pet.breed}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+        
   
       <View style={styles.container}>
         <View style={styles.buttonsRow}>

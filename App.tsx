@@ -11,6 +11,10 @@ import SignUp from './app/screens/Login/SignUp';
 import HomeTabs from './app/HomeTabs';
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from './app/utils/functions/pushNotificationSetup'; // Adjust this import path to where you manage notification setup
+import ForgotPassword from './app/screens/Login/ForgotPassword';
+import VerifyResetCode from './app/screens/Login/VerifyResetCode';
+import ResetPassword from './app/screens/Login/ResetPassword';
+import VerifySignUpCode from './app/screens/Login/VerifySignUpCode';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +83,10 @@ const MyStack = () => {
           <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
           <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
           <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
+          <Stack.Screen name="VerifyResetCode" component={VerifyResetCode} options={{ headerShown: false }} />
+          <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+          <Stack.Screen name="VerifySignUpCode" component={VerifySignUpCode} options={{ headerShown: false }} />
         </>
       )}
     </Stack.Navigator>

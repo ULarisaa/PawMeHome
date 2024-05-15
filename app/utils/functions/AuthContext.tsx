@@ -14,7 +14,9 @@ interface AuthContextType {
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>; // Add this line
 }
+
 
 // Create the context with an undefined default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,8 +49,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if (!response.ok) throw new Error('Login failed');
-      const data = await response.json();
+      const data = await response.json(); // Parse JSON response in any case
+      if (!response.ok) {
+        const error = (data && data.message) ? data.message : 'Login failed';
+        throw new Error(error);
+      }
       if (data.token) {
         await AsyncStorage.setItem('userToken', data.token);
         setCurrentUser({ token: data.token });
@@ -60,6 +65,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
   };
+  
 
   const signup = async (email: string, password: string) => {
     try {
@@ -83,15 +89,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = async () => {
+    console.log(currentUser);
     await AsyncStorage.removeItem('userToken');
     setCurrentUser(null);
   };
+  
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ currentUser, login, signup, logout, loading, setLoading }}>
       {children}
     </AuthContext.Provider>
   );
+  
 };
 
 // Hook to use the authentication context

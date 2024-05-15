@@ -12,6 +12,7 @@ export const Colors = {
     timebox:'#dddddd',
     circle: '#538AA8',
     googleBText:'#000000',
+    petContainer:'#538AA8',
   },
   dark: {
     primary: '#538AA8',
@@ -25,6 +26,7 @@ export const Colors = {
     timebox:'#dddddd',
     circle: '#FFFFFF',
     googleBText:'#FFFFFF',
+    petContainer:'#000000',
   },
 };
 

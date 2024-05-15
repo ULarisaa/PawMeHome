@@ -362,7 +362,6 @@ const { petId } = route.params;
         multiline={true}
       />
     
-      <TestNotificationButton token={expoPushToken} />
       </View>
     </ScrollView>
     </KeyboardAvoidingView>

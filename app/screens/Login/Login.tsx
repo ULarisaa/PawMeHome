@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Image, Switch } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../../components/Header';
 import withDefaultMargins from '../../utils/Margins';
@@ -8,6 +8,8 @@ import { ResponseType } from 'expo-auth-session';
 import { clientId, SERVER_URL } from '../../utils/consts';
 import { useLoginStyles } from './styles';
 import { useAuth } from '../../utils/functions/AuthContext';
+import { primary } from '../../utils/colors';
+
 
 
 const googleLogo = require('../../utils/images/google.png');
@@ -20,6 +22,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const styles = useLoginStyles();
     const { login } = useAuth(); 
+    const [showPassword, setShowPassword] = useState(false);
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         clientId,
@@ -51,43 +54,15 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            const success = await login(email, password); // Ensure login either returns true or throws
-            if (success) {
-                navigation.navigate('HomeTabs'); // Navigate to HomeTabs only if login successful
-            } else {
-                throw new Error('Login failed unexpectedly');
-            }
+            await login(email, password); // login should handle setting the user context
+            navigation.navigate('HomeTabs');
         } catch (error) {
-            setError(error.message || 'Failed to log in');
+            setError(error.message || 'Login failed. Please check your credentials and try again.');
         } finally {
             setLoading(false);
         }
     };
     
-    const handleForgotPassword = async () => {
-        if (email) {
-            try {
-                const response = await fetch(`${SERVER_URL}/users/request-password-reset`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email }),
-                });
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to send password reset email');
-                }
-
-                alert('Password reset email sent. Please check your inbox.');
-            } catch (error) {
-                setError(error.message);
-            }
-        } else {
-            setError('Please enter your email address.');
-        }
-    };
 
     const navigateToSignUp = () => {
         navigation.navigate('SignUp');
@@ -105,59 +80,63 @@ const Login = () => {
           </TouchableOpacity>
         );
     };
-    return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-            <View style={{ flex: 1, padding: 20 }}>
-                <Header />
-                <View style={[styles.container]}>
-                    {/* Input fields and login button */}
-                    <TextInput
-                        style={[styles.input]}
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-    
-                    <TextInput
-                        style={[styles.input]}
-                        placeholder="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
-                    <View style={{ alignItems: 'flex-end' }}>
-                        <TouchableOpacity onPress={handleForgotPassword}>
-                            <Text style={styles.linkText}>Forgot Password?</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {loading ? (
-                        <ActivityIndicator />
-                    ) : (
-                        <>
+
+        return (
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+                <View style={{ flex: 1, padding: 20 }}>
+                    <Header />
+                    <View style={[styles.container]}>
+                        <TextInput
+                            style={[styles.input]}
+                            placeholder="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                        />
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TextInput
+                            style={[styles.input, { flex: 1 }]}
+                            placeholder="Password"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword} 
+                        />
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}>
+                            <Switch
+                                trackColor={{ false: "gray", true: primary }}
+                                onValueChange={() => setShowPassword(!showPassword)}
+                                value={showPassword}
+                            />
+                            <Text style={styles.text}>Show Password</Text>
+                        </View>
+
+                        <View style={{ alignItems: 'flex-end' }}>
+                            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                                <Text style={styles.linkText}>Forgot Password?</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {loading ? (
+                             <ActivityIndicator size="large" color={primary} />
+                        ) : (
                             <TouchableOpacity onPress={handleLogin} style={styles.button}>
                                 <Text style={styles.buttonText}>Log In</Text>
                             </TouchableOpacity>
-                        </>
-                    )}
-                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                        )}
+                        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    </View> 
+                    <View style={{ justifyContent: 'flex-end', flex: 1 }}>
+                        <Text style={ [styles.title, {textAlign: 'center', marginTop: 20, marginBottom: 5 }]}>Don't have an account?</Text>
+                        <GoogleLoginButton onPress={() => { promptAsync(); }} disabled={!request} />
+                        <Text style={{ textAlign: 'center', marginBottom: 5 }}>or</Text>
+                        <TouchableOpacity onPress={navigateToSignUp}>
+                            <Text style={[styles.linkText, { textAlign: 'center', marginBottom: 20 }]}>Create an account</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                {/* Adjusting the layout to move the new account section closer */}
-                <View style={{ justifyContent: 'flex-end', flex: 1 }}>
-                    <Text style={ [styles.title, {textAlign: 'center', marginTop: 20, marginBottom: 5 }]}>Don't have an account?</Text>
-                    <GoogleLoginButton onPress={() => { promptAsync(); }} disabled={!request} />
-                    <Text style={{ textAlign: 'center', marginBottom: 5 }}>or</Text>
-                    <TouchableOpacity onPress={navigateToSignUp}>
-                        <Text style={[styles.linkText, { textAlign: 'center', marginBottom: 20 }]}>Create an account</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </KeyboardAvoidingView>
-    );
+            </KeyboardAvoidingView>
+        );
+    };
     
-    
-       
-};
-
-export default withDefaultMargins(Login);
+    export default withDefaultMargins(Login);

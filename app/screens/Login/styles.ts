@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import { Colors } from '../../utils/colors';
+import { Colors, primary } from '../../utils/colors';
 
 export const useLoginStyles = () => {
   const scheme = useColorScheme(); 
@@ -49,10 +49,40 @@ export const useLoginStyles = () => {
       color: Colors[scheme].primary,
       textAlign: 'center',
     },
-    errorText: {
-      marginTop: 10,
-      color: 'red', 
+    text: {
+      color: Colors[scheme].text,
+      marginLeft: 10,
+      fontSize: 16,
     },
+    timerText: {
+      color: '#666',
+      textAlign: 'center',
+      marginTop: 10,
+      fontSize: 16,
+  },
+  resendButton: {
+    marginTop:20,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center', // Center the text inside the button
+    justifyContent: 'center',
+},
+
+resendButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+},
+textEnabled: {
+    color:primary,
+},
+textDisabled: {
+    color: '#666666', 
+},
+  errorText: {
+      color: 'red',
+      textAlign: 'center',
+      marginTop: 20,
+  },
     googleButton: {
     marginTop: 32,
       flexDirection: 'row',
@@ -77,6 +107,16 @@ export const useLoginStyles = () => {
     disabled: {
       backgroundColor: '#EEEEEE',
     },
+    codeInput: {
+      width: 40,  // Lățimea fiecărui input pentru a se potrivi unei cifre
+      borderBottomWidth: 2,  // Subliniază fiecare căsuță pentru un aspect curat
+      borderColor: 'gray',
+      textAlign: 'center',
+      fontSize: 18,  // Mărește fontul pentru lizibilitate
+      marginHorizontal: 5,  // Spațiu între căsuțe
+      color: Colors[scheme].text,
+  },
+  
   });
 
   return styles;

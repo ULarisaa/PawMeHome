@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import PetProfile from '../PetProfile/PetProfile';
 import CreateEvent from '../PetProfile/CreateEvent';
 import EditProfile from '../PetProfile/EditProfile';
+import EditEvent from '../PetProfile/EditEvent';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ function DashboardNavigator() {
       <Stack.Screen name="PetProfile" component={PetProfile} options={{ headerShown: false }} />
       <Stack.Screen name="CreateEvent" component={CreateEvent} options={{ headerShown: false  }} />
       <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false  }} />
+      <Stack.Screen name="EditEvent" component={EditEvent} options={{ headerShown: false  }} />
     </Stack.Navigator>
   );
 }

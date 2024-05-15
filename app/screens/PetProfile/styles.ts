@@ -18,6 +18,14 @@ export const usePetProfileStyles = () => {
       marginTop: 16,
       marginBottom: 10,
     },
+    iconColor:{
+      color: Colors[scheme].text,
+    },
+    textColor:{
+      color: Colors[scheme].text,
+
+    },
+    
     input: {
       width: '100%',
       fontSize:16,
@@ -63,7 +71,7 @@ export const usePetProfileStyles = () => {
     createtext: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: Colors[scheme].text,
+      color: '#FFFFFF',
     },
     description: {
       fontSize: 18,

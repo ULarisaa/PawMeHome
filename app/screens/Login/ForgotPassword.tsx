@@ -1,94 +1,87 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../../FirebaseConfig';
+import {
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert,
+  ScrollView
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+import Header from '../../components/Header';
 import withDefaultMargins from '../../utils/Margins';
+import { useLoginStyles } from './styles';
+import { SERVER_URL } from '../../utils/consts';
 
 const ForgotPassword = () => {
+    const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const styles = useLoginStyles();
 
     const handleResetPassword = async () => {
+        if (!email) {
+            Alert.alert('Error', 'Please enter your email address.');
+            return;
+        }
         setLoading(true);
-        setMessage('');
         setError('');
         try {
-            await sendPasswordResetEmail(auth, email);
-            setLoading(false);
-            setMessage('Check your email to reset your password.');
+            const response = await fetch(`${SERVER_URL}/users/password-reset`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                // Display alert and navigate on user confirmation
+                Alert.alert(
+                    'Success',
+                    'Check your email for the reset code.',
+                    [
+                        { text: 'OK', onPress: () => navigation.navigate('VerifyResetCode', { email: email }) }
+                    ]
+                );
+            } else {
+                throw new Error(data.message || 'Failed to send reset email.');
+            }
         } catch (error) {
             setError(error.message);
+            Alert.alert('Error', error.message);
+        } finally {
             setLoading(false);
         }
     };
+    
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Reset Password</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-            />
-            {loading ? (
-                <ActivityIndicator />
-            ) : (
-                <TouchableOpacity onPress={handleResetPassword} style={styles.button}>
-                    <Text style={styles.buttonText}>Send Reset Email</Text>
-                </TouchableOpacity>
-            )}
-            {message ? <Text style={styles.messageText}>{message}</Text> : null}
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+    <ScrollView style={{ flex: 1 }}>
+        <View style={{ padding: 20 }}>
+            <Header />
+            <View style={[styles.container, { marginTop: 55 }]}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                />
+                {loading ? (
+                    <ActivityIndicator size="large" color={primary} />
+                ) : (
+                    <TouchableOpacity onPress={handleResetPassword} style={styles.button}>
+                        <Text style={styles.buttonText}>Send Reset Email</Text>
+                    </TouchableOpacity>
+                )}
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            </View>
         </View>
+    </ScrollView>
+</KeyboardAvoidingView>
+
     );
 };
-
-
-const styles = StyleSheet.create({
-    linkButton: {
-        marginTop: 10,
-    },
-    linkText: {
-        color: 'blue',
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        margin: 20,
-    },
-    input: {
-        width: '80%',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: 'gray',
-        marginBottom: 10,
-        borderRadius: 5,
-    },
-    button: {
-        backgroundColor: 'blue',
-        padding: 10,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: 'white',
-        textAlign: 'center',
-    },
-    errorText: {
-        color: 'red',
-        marginTop: 10,
-    },
-});
-
 
 export default withDefaultMargins(ForgotPassword);

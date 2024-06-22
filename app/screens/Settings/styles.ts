@@ -1,6 +1,6 @@
 
 import { StyleSheet } from 'react-native';
-import { Colors } from '../../utils/colors';
+import { Colors } from '../../assets/colors';
 
 export const getStyles = (scheme: string) => StyleSheet.create({
   container: {
@@ -14,4 +14,5 @@ export const getStyles = (scheme: string) => StyleSheet.create({
     marginBottom: 20,
     color: Colors[scheme].text,
   },
+  
 });

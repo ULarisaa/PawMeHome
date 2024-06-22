@@ -2,26 +2,26 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SERVER_URL } from '../consts';
 
-// Define the type for the user's data
+
 interface User {
   token: string;
 }
 
-// Define the type for the context state
+
 interface AuthContextType {
   currentUser: User | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>; // Add this line
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>; 
 }
 
 
-// Create the context with an undefined default value
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Define the type for the AuthProvider's props
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await response.json(); // Parse JSON response in any case
+      const data = await response.json(); 
       if (!response.ok) {
         const error = (data && data.message) ? data.message : 'Login failed';
         throw new Error(error);
@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
 };
 
-// Hook to use the authentication context
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

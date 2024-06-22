@@ -4,15 +4,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AddPet from './screens/AddPet/AddPet';
 import Dashboard from './screens/Dashboard/Dashboard';
-import Settings from './screens/Settings/Settings';
 import Notifications from './screens/Notifications/Notifications';
 import { useNavigation } from '@react-navigation/native';
-import { Colors } from './utils/colors';
+import { Colors } from './assets/colors';
 import DashboardNavigator from './screens/Dashboard/DashboardNavigator';
 import { useColorScheme } from './utils/ColorSchemeContext';
 import { SERVER_URL } from './utils/consts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from './utils/functions/AuthContext';
+import SettingsNavigator from './screens/Settings/SettingsNavigator';
 
 const Tab = createBottomTabNavigator();
 const iconSize = 30;
@@ -55,9 +55,9 @@ function HomeTabs() {
   
     fetchCount();
   
-    const interval = setInterval(fetchCount, 1000); // Verifică la fiecare 10 secunde
+    const interval = setInterval(fetchCount, 1000); 
   
-    return () => clearInterval(interval); // Curăță intervalul la demontarea componentei
+    return () => clearInterval(interval); 
   }, []);
   
 
@@ -65,7 +65,7 @@ function HomeTabs() {
   const handleLogout = async () => {
     try {
         await logout();
-        navigation.navigate('Login'); // Presupunând că 'Login' este numele rutei către pagina de login
+        navigation.navigate('Login'); 
     } catch (error) {
         console.error('Logout failed:', error);
     }
@@ -81,17 +81,18 @@ function HomeTabs() {
             case 'Dashboard':
               return <Ionicons name={focused ? 'paw' : 'paw-outline'} size={iconSize} color={color} />;
               case 'Notifications':
-                return (
-                  <NotificationIcon
-                    focused={focused}
-                    color={color}
-                    notificationCount={notificationCount}
-                    onPress={() => navigation.navigate('Notifications')} // Adaugă această linie
-                  />
-                );
+              return (
+                <NotificationIcon
+                  focused={focused}
+                  color={color}
+                  notificationCount={notificationCount}
+                  onPress={() => navigation.navigate('Notifications')} 
+                />
+              );
+
             case 'AddPet':
               return <Ionicons name={focused ? 'add-circle' : 'add-circle-outline'} size={iconSize} color={color} />;
-            case 'Settings':
+            case 'SettingsNavigator':
               return <Ionicons name={focused ? 'settings' : 'settings-outline'} size={iconSize} color={color} />;
             case 'Logout':
               return <Ionicons name="log-out-outline" size={iconSize} color={color} />;
@@ -102,14 +103,14 @@ function HomeTabs() {
         tabBarActiveTintColor: Colors[scheme].primary,
         tabBarInactiveTintColor: Colors[scheme].inactive,
         tabBarStyle: {
-          backgroundColor: Colors[scheme].menu // Culoarea de fundal a tab bar-ului bazată pe schema
+          backgroundColor: Colors[scheme].menu 
         },
       })}
     >
       <Tab.Screen name="Notifications" component={Notifications} />
       <Tab.Screen name="AddPet" component={AddPet} />
       <Tab.Screen name="Dashboard" component={DashboardNavigator} />
-      <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="SettingsNavigator" component={SettingsNavigator} />
       <Tab.Screen
         name="Logout"
         component={View} 

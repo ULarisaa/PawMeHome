@@ -21,7 +21,7 @@ const DatePickerField = () => {
       <TextInput
         value={date.toLocaleDateString()}
         onFocus={showDatepicker}
-        editable={false} // Previne tastatura să apară
+        editable={false} 
       />
       {show && (
         <DateTimePicker

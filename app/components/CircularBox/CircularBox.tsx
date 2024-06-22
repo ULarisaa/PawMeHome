@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ImageSourcePropType, TextStyle } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {  Text, Image, TouchableOpacity, ImageSourcePropType, TextStyle } from 'react-native';
 import { useCircularBoxStyles } from './styles';
 
 interface CircularBoxProps {
@@ -12,7 +11,6 @@ interface CircularBoxProps {
 }
 
 const CircularBox: React.FC<CircularBoxProps> = ({ name, imageUrl, onPress, textStyle }) => {
-  const navigation = useNavigation();
   const styles = useCircularBoxStyles(); 
 
   return (

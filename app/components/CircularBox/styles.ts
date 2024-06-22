@@ -1,7 +1,6 @@
-// CircularBoxStyles.ts
 import { StyleSheet } from 'react-native';
-import { useColorScheme } from '../../utils/ColorSchemeContext'; // Ajustează calea dacă este necesar
-import { Colors } from '../../utils/colors';
+import { useColorScheme } from '../../utils/ColorSchemeContext';
+import { Colors } from '../../assets/colors';
 
 export const useCircularBoxStyles = () => {
   const scheme = useColorScheme();
@@ -24,7 +23,7 @@ export const useCircularBoxStyles = () => {
       position: 'absolute',
       bottom: -20,
       textAlign: 'center',
-      color: Colors[scheme].text, // Ajustează în funcție de nevoi
+      color: Colors[scheme].text,
     },
     plus: {
       fontSize: 24,

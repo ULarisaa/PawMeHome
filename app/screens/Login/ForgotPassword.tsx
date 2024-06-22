@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert,
-  ScrollView
-} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert,ScrollView} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 import Header from '../../components/Header';
-import withDefaultMargins from '../../utils/Margins';
+import withDefaultMargins from '../../assets/Margins';
 import { useLoginStyles } from './styles';
 import { SERVER_URL } from '../../utils/consts';
+import { primary } from '../../assets/colors';
 
 const ForgotPassword = () => {
     const navigation = useNavigation();
@@ -34,7 +31,6 @@ const ForgotPassword = () => {
             });
             const data = await response.json();
             if (response.ok) {
-                // Display alert and navigate on user confirmation
                 Alert.alert(
                     'Success',
                     'Check your email for the reset code.',

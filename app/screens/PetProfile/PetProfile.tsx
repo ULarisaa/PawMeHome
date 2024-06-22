@@ -1,59 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, Button, Alert, Linking, TouchableOpacity, FlatList, SectionList, TextInput } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
-import * as Location from 'expo-location';
-import withDefaultMargins from '../../utils/Margins';
+import { View, Text, Image,  Alert, Linking, TouchableOpacity } from 'react-native';
+import withDefaultMargins from '../../assets/Margins';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { calculateDistance } from '../../utils/functions/CalculateDistance';
-import LoadingScreen from '../../utils/functions/Loading/Loading';
+import LoadingScreen from '../../components/Loading/Loading';
 import { SERVER_URL } from '../../utils/consts';
 import { usePetProfileStyles } from './styles';
+import EventCalendarWithTimeline from '../../components/Calendar/Calendar';
+import LocationComponent from '../../components/LocationComponent';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { FontAwesome5 } from 'react-native-vector-icons';
-import { primary } from '../../utils/colors';
-import EventCalendar from '../../components/Calendar';
-import EventCalendarWithTimeline from '../../components/Calendar';
-
-
 
 const PetProfile = () => {
   const [pet, setPet] = useState(null);
   const navigation = useNavigation();
-    const route = useRoute();
-    const { petId } = route.params;
-    const [userLocation, setUserLocation] = useState({ latitude: 0, longitude: 0 });
-    const [distanceToPet, setDistanceToPet] = useState(null);
-    const [activeSection, setActiveSection] = useState('history');
-    const styles = usePetProfileStyles();
-    const [loadingMap, setLoadingMap] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const isSelected = (section) => activeSection === section;
+  const route = useRoute();
+  const { petId, selectedItem } = route.params;
+  const [activeSection, setActiveSection] = useState(selectedItem || 'history'); // Setează activeSection pe baza selectedItem; dacă nu este disponibil, setează pe "history"
 
-    const [events, setEvents] = useState([]);
-    
+  const styles = usePetProfileStyles();
+  const [loadingMap, setLoadingMap] = useState(true);
+  const isSelected = (section) => activeSection === section;
+  const [isPressed, setIsPressed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [events, setEvents] = useState([]);
+  
+  const handleToggle = async () => {
+    if (loading) return; // Evită trimiterea de cereri multiple
+    setLoading(true);
+    setError('');
 
-    const handleSearch = (text) => {
-      setSearchQuery(text.toLowerCase());
-    };
+    try {
+        const newState = !isPressed;
+        const response = await fetch(`${SERVER_URL}/location/updateIsWalking`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ petId, isWalking: newState }),
+        });
+
+        const data = await response.text(); // Citeste raspunsul ca text
+
+        if (!response.ok) {
+            throw new Error(data || 'Failed to update state'); // Foloseste raspunsul ca mesaj de eroare
+        }
+
+        Alert.alert('Success', `Walking state updated to ${newState ? 'active' : 'inactive'}`);
+        setIsPressed(newState); // Actualizează starea locală
+        
+    } catch (error) {
+        setError(error.message);
+        Alert.alert('Error', error.message);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     const fetchEventsForPet = async (petId) => {
       try {
           const response = await fetch(`${SERVER_URL}/events/pets/${petId}`);
-          const { allEvents } = await response.json(); // Extrage allEvents din răspuns
+          const { allEvents } = await response.json(); 
     
-          setEvents(allEvents); // Actualizează starea cu toate evenimentele
+          setEvents(allEvents); 
       } catch (err) {
-          console.error('Error fetching events:', err); // Loghează orice eroare
+          console.error('Error fetching events:', err); 
       }
     };
     
-  // Folosește efectul pentru a încărca evenimentele când componenta este montată sau când petId se schimbă
+
   useEffect(() => {
-    if (petId) { // Verifică dacă petId este definit
+    if (petId) { 
         fetchEventsForPet(petId);
     }
-}, []); // Adaugă petId în lista de dependințe
+}, []); 
 
     useEffect(() => {
       const fetchPet = async () => {
@@ -78,49 +98,34 @@ const PetProfile = () => {
           console.error('Failed to fetch pet:', error);
         }
       finally {
-        // Se execută indiferent de rezultatul try/catch
-        setLoadingMap(false); // Sfârșește încărcarea dacă a eșuat preluarea datelor animalului de companie
+        setLoadingMap(false); 
       }
+      };
+      const fetchPetData = async () => {
+        console.log('start', petId);
+        try {
+          const response = await fetch(`${SERVER_URL}/location/walking/${petId}`);
+          console.log(response);
+          if (!response.ok) {
+            throw new Error('Failed to fetch pet data');
+          }
+          console.log(response);
+          const petData = await response.json();
+          console.log('stare',petData);
+
+          setIsPressed(petData.is_walking); 
+        } catch (error) {
+
+        }
       };
     
       if (petId) {
         fetchPet();
+        fetchPetData();
       }
     }, [petId]);
-    
-    useEffect(() => {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        console.log("Location permission status:", status);
-    
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permission Denied',
-            'This app requires location permissions to function. Please enable them in settings.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Open Settings', onPress: () => Linking.openSettings() },
-            ]
-          );
-          return;
-        }
-    
-        let location = await Location.getCurrentPositionAsync({});
-        console.log("User location:", location.coords);
-    
-        // Setează starea userLocation aici
-        setUserLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-    
-        if (pet && pet.latitude && pet.longitude) { // Asigură-te că pet are setate latitudinea și longitudinea
-          console.log("Pet location:", { latitude: pet.latitude, longitude: pet.longitude });
-          const distance = calculateDistance(location.coords.latitude, location.coords.longitude, pet.latitude, pet.longitude);
-          console.log("Distance to pet:", distance); // Confirmă că loghează o valoare sensibilă pentru distanță
-          setDistanceToPet(distance);
-          setLoadingMap(false);
-        }
-      })();
-    }, [pet]); // Dependența este 'pet', astfel încât acest efect să se ruleze din nou atunci când 'pet' se schimbă
-    
+
+
 
     const handleDeletePet = () => {
       Alert.alert(
@@ -149,7 +154,7 @@ const PetProfile = () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            // Include aici orice alte headere necesare, de exemplu un token de autentificare
+      
           },
         });
   
@@ -158,107 +163,30 @@ const PetProfile = () => {
         }
   
         console.log('Profile deleted successfully!');
-        navigation.navigate('DashboardScreen'); // Navigăm înapoi la Dashboard după ștergerea cu succes
+        navigation.navigate('DashboardScreen'); 
       } catch (error) {
         console.error('Error deleting profile:', error);
       }
     };
   
-    const formatDistance = (distance) => {
-      if (distance < 1) {
-        // Dacă distanța este mai mică de 1 km, o convertim în metri și rotunjim la cel mai apropiat întreg
-        return `${Math.round(distance * 1000)} meters`;
-      } else {
-        // Dacă distanța este de 1 km sau mai mult, o afișăm ca atare, cu două zecimale
-        return `${distance.toFixed(2)} km`;
-      }
-    };
 
-    const calculateEstimatedTime = (distanceInKm, speedInMps) => {
-      if (speedInMps >= 0) {
-        const speedInKph = speedInMps * 3.6; // Convertim viteza din m/s în km/h
-        if (speedInKph > 0) {
-          const timeInHours = distanceInKm / speedInKph;
-          const hours = Math.floor(timeInHours);
-          const minutes = Math.round((timeInHours - hours) * 60);
-          return `${hours > 0 ? `${hours}h ` : ''}${minutes}min`;
-        }
-        return 'Indisponibilă din cauza lipsei de mișcare';
-      }
-      return 'Viteza nu este disponibilă';
-    };
-    const speedInMps = userLocation.speed; // viteza în metri pe secundă
-    const distanceInKm = distanceToPet; // distanța în kilometri
-
-    const estimatedTimeText = calculateEstimatedTime(distanceInKm, speedInMps);
-        
-    
-
-    const formatBirthdate = (dateString) => {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
-    };
+  
 
     if (!pet ) {
-      return <LoadingScreen />; // sau orice alt component de "loading" ai prefera
+      return <LoadingScreen />; 
   }
 
     const renderSectionContent = () => {
         switch (activeSection) {
             case 'location':
-              if (loadingMap) {
-                return <LoadingScreen/>; 
-            }
-                  return (
-                    <View>
-                    <View style={styles.mapContainer}>
-                        <MapView
-                            style={styles.map}
-                            initialRegion={{
-                                latitude: (userLocation.latitude + pet.latitude) / 2,
-                                longitude: (userLocation.longitude + pet.longitude) / 2,
-                                latitudeDelta: Math.abs(userLocation.latitude - pet.latitude)+0.02,
-                                longitudeDelta: Math.abs(userLocation.longitude - pet.longitude)+0.02,
-                            }}
-                        >
-                            <Marker
-                                coordinate={{ latitude: pet.latitude, longitude: pet.longitude }}
-                                title={`${pet.name}'s Location`}
-                            />
-                            <Marker
-                                coordinate={{ latitude: userLocation.latitude, longitude: userLocation.longitude }}
-                                title="Your Location"
-                                pinColor="blue"
-                            />
-                            <Polyline
-                                coordinates={[
-                                    { latitude: userLocation.latitude, longitude: userLocation.longitude },
-                                    { latitude: pet.latitude, longitude: pet.longitude },
-                                ]}
-                                strokeColor="#FF0000"
-                                geodesic={true}
-                                strokeWidth={2}
-                            />
-                        </MapView>
-                        </View>
-                        {distanceToPet && (
-                    <View>
-                    <Text style={styles.distanceText}>Distance to pet: {formatDistance(distanceToPet)}</Text>
-                  </View>
-                  )}
-                   <View>
-                      <Text style={styles.distanceText}>
-                        Timp estimat de călătorie: {estimatedTimeText}
-                      </Text>
-                    </View>
+              return (
+                <View style={{ flex: 1 }}>
+                  <LocationComponent pet={pet} loadingMap={loadingMap}  navigation={navigation} /> 
 
-                  </View>
-
+              </View>
               );
                 case 'history':
       
-               
-                
                 return (
                   <View style={{ flex: 1 }}>
                   <EventCalendarWithTimeline petId={petId} />
@@ -268,29 +196,43 @@ const PetProfile = () => {
                   case 'settings':
                     return (
                       <View style={styles.settingsContainer}>
+                     <TouchableOpacity
+                        style={styles.create}
+                        onPress={() => navigation.navigate('CreateEvent', { petId: pet.id })}
+                      >
+                        <Icon name="add-circle" size={22} color="white" />
+                        <Text style={styles.createText}>Create Event</Text>
+                      </TouchableOpacity>
+
                       <TouchableOpacity
                         style={styles.create}
-                        onPress={() => navigation.navigate('CreateEvent', { petId: pet.id })} // Modificat pentru a include ID-ul animalului ca parametru
+                        onPress={() => navigation.navigate('EditProfile', { petId: pet.id })}
                       >
-                      <FontAwesome5 name="plus-square" size={22} color="white" />
-                        <Text style={styles.createtext}>Create Event</Text>
+                        <Icon name="edit" size={22} color="white" />
+                        <Text style={styles.createText}>Edit Profile</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.create}  onPress={() => navigation.navigate('EditProfile', { petId: pet.id })}>
-                           < FontAwesome5 name="edit" size={22} color="white" />
-                        <Text style={styles.createtext}>Edit Profile</Text>
+
+                      <TouchableOpacity
+                        style={styles.create}
+                        onPress={() => navigation.navigate('Settings', { petId: pet.id })}
+                      >
+                        <Icon name="settings" size={22} color="white" />
+                        <Text style={styles.createText}>Settings</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.create  } onPress={() => {/* Navighează la setările dispozitivului */}}>
-                      < FontAwesome5 name="tools" size={22} color="white" />
-                        <Text style={styles.createtext}>Device Settings</Text>
+
+                      <TouchableOpacity
+                          style={[styles.create, isPressed ? styles.buttonEnabled : styles.buttonDisabled]}
+                          onPress={handleToggle}
+                      >
+                          <Icon name="pets" size={22} color="white" />
+                          <Text style={styles.createText}>{isPressed ? 'Stop Walking' : 'Start Walking'}</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.create} onPress={() => {/* Navighează la ecranul următor */}}>
-                        <FontAwesome5 name="dog" size={22} color="white" />
-                        <Text style={styles.createtext}>Start Walking</Text>
-                      </TouchableOpacity>
+
                       <TouchableOpacity style={styles.create} onPress={handleDeletePet}>
-                        <FontAwesome5 name="trash" size={22} color="white" />
-                        <Text style={styles.createtext}>Delete Profile</Text>
+                        <Icon name="delete" size={22} color="white" />
+                        <Text style={styles.createText}>Delete Profile</Text>
                       </TouchableOpacity>
+
                      
 
                     </View>
@@ -301,12 +243,7 @@ const PetProfile = () => {
         }
     };
 
-    const renderActiveIndicator = (section) => {
-      if (activeSection === section) {
-          return { backgroundColor: 'lightgrey' }; // Stil pentru secțiunea activă
-      }
-      return {}; // Stil gol pentru secțiunile inactive
-  };
+
 
   function calculateAge(birthdate) {
     const birthDate = new Date(birthdate);
@@ -316,25 +253,27 @@ const PetProfile = () => {
     let months = today.getMonth() - birthDate.getMonth();
     let days = today.getDate() - birthDate.getDate();
   
-    // Adjust months for past month
+
     if (days < 0) {
       months--;
     }
   
-    // If months negative after adjustment, adjust years and set months to positive
+
     if (months < 0) {
       years--;
       months += 12;
     }
   
-    // Generate age string based on years and months calculated
+
     if (years === 0) {
       return `${months} month${months !== 1 ? 's' : ''}`;
     } else if (years === 1 && months === 0) {
       return `${years} year`;
     } else if (years === 1 && months !== 0) {
       return `${years} year and ${months} months`;
-    } else {
+    }else if ( months === 0) {
+      return `${years} years`;
+    }else {
       return `${years} years and ${months} months`;
     }
   }
@@ -357,34 +296,38 @@ const PetProfile = () => {
         <Image source={{ uri: pet.imageUrl }} style={{ width: 150, height: 150, borderRadius: 100 }} />
         
         <View style={{ marginLeft: 20 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <FontAwesome5 name="paw" size={16} color={styles.iconColor.color} />
-                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
-                            {pet.name}
-                        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Icon name="pets" size={16} color={styles.iconColor.color} />
+                      <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                        {pet.name}
+                      </Text>
                     </View>
+
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                        <FontAwesome5 name="birthday-cake" size={16} color={styles.iconColor.color} />
-                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
-                            {formatDate(pet.birthdate)}
-                        </Text>
+                      <Icon name="cake" size={16} color={styles.iconColor.color} />
+                      <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                        {formatDate(pet.birthdate)}
+                      </Text>
                     </View>
+
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                        <FontAwesome5 name="hourglass-half" size={16} color={styles.iconColor.color} />
-                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
-                            {calculateAge(pet.birthdate)}
-                        </Text>
+                      <Icon name="hourglass-bottom" size={16} color={styles.iconColor.color} />
+                      <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                        {calculateAge(pet.birthdate)}
+                      </Text>
                     </View>
+
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                        {pet.sex === 'male' ? (
-                            <FontAwesome5 name="mars" size={16} color={styles.iconColor.color} />
-                        ) : (
-                            <FontAwesome5 name="venus" size={16} color={styles.iconColor.color} />
-                        )}
-                        <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
-                            {pet.breed}
-                        </Text>
+                      {pet.sex === 'male' ? (
+                        <Icon name="male" size={16} color={styles.iconColor.color} />
+                      ) : (
+                        <Icon name="female" size={16} color={styles.iconColor.color} />
+                      )}
+                      <Text style={[styles.textColor, { marginLeft: 5, fontSize: 16, lineHeight: 20 }]}>
+                        {pet.breed}
+                      </Text>
                     </View>
+
                 </View>
             </View>
         
@@ -396,22 +339,20 @@ const PetProfile = () => {
               key={section}
               style={[
                 styles.button,
-                isSelected(section) && styles.activeButton, // Aplică stilul pentru butonul selectat
+                isSelected(section) && styles.activeButton, 
               ]}
               onPress={() => {
                 setActiveSection(section);
                 if (section === 'history') {
-                  // Dacă secțiunea selectată este 'history', încarcă evenimentele
-                  // Aici presupunem că petId este disponibil în scopul acestei componente
                   fetchEventsForPet(petId);
                 }
               }}
             >
               <Text style={[
                 styles.buttonText,
-                isSelected(section) && styles.selectedButtonText, // Schimbă culoarea textului pentru butonul selectat
+                isSelected(section) && styles.selectedButtonText, 
               ]}>
-                {section.charAt(0).toUpperCase() + section.slice(1)} {/* Capitalizează prima literă */}
+                {section.charAt(0).toUpperCase() + section.slice(1)} 
               </Text>
             </TouchableOpacity>
           ))}
@@ -428,4 +369,8 @@ const PetProfile = () => {
 };
 
 export default withDefaultMargins(PetProfile);
+
+function setError(message: any) {
+  throw new Error('Function not implemented.');
+}
 

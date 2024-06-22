@@ -1,34 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Alert, Image, TouchableOpacity, Platform, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import UploadModal from '../../utils/functions/UploadModal';
-import { usePetsStyles } from './styles'; // Asigură-te că calea este corectă
-import { Colors, primary } from '../../utils/colors';
+import UploadModal from '../../components/UploadModal';
+import { usePetsStyles } from './styles'; 
+import { Colors, primary } from '../../assets/colors';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import withDefaultMargins from '../../utils/Margins';
+import withDefaultMargins from '../../assets/Margins';
 import { SERVER_URL } from '../../utils/consts';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import LoadingScreen from '../../components/Loading/Loading';
+import { useAuth } from '../../utils/functions/AuthContext';
 
 const AddPet = () => {
   const [name, setName] = useState('');
   const [birthdate, setBirthDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null); 
   const styles = usePetsStyles();
   const scheme = useColorScheme();
   const [sex, setSex] = useState(''); 
   const [breed, setBreed] = useState('');
   const navigation=useNavigation();
+  const { currentUser } = useAuth();
   
+  useEffect(() => {
+  
+    resetForm();
+  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      resetForm();
+    }, [])
+  );
+  
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch(`${SERVER_URL}/users/decodeToken`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: currentUser.token }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUserId(data.userId); 
+          console.log('id',data.userId);
+        } else {
+          throw new Error('Failed to fetch userId');
+        }
+      } catch (error) {
+        console.error('Error fetching userId:', error);
+      }
+    };
+
+    if (currentUser.token) {
+      fetchUserId();
+    }
+  }, [currentUser.token]);
+
   const uploadImageAsync = async (uri: string) => {
     const formData = new FormData();
     formData.append('image', { uri: uri, name: 'upload.jpg', type: 'image/jpeg' });
-
-    
 
     const response = await fetch(`${SERVER_URL}/pets/upload-image`, {
       method: 'POST',
@@ -46,60 +84,72 @@ const AddPet = () => {
     return data.imageUrl;
   };
 
-
   const handleSubmit = async () => {
-    if (!name || !imageUrl) { // Removed the check for age since it's not used
-        Alert.alert("Error", "Please fill all the fields and select an image.");
-        return;
+    if (!name || !imageUrl || !userId) { 
+      Alert.alert("Error", "Please fill all the fields and select an image.");
+      return;
     }
 
-    setIsLoading(true);
+    setLoading(true);
     try {
-        const imageUrlResult = await uploadImageAsync(imageUrl);
+      const imageUrlResult = await uploadImageAsync(imageUrl);
+  
+      const birthDateString = birthdate.toISOString().split('T')[0];
         
-        // Formatting birthDate to a string that can be easily processed by your server
-        // Assuming your server accepts dates in 'YYYY-MM-DD' format
-        const birthDateString = birthdate.toISOString().split('T')[0];
-        
-        const petData = { name, birthdate: birthDateString, imageUrl: imageUrlResult, breed, sex };
+      const petData = { name, birthdate: birthDateString, imageUrl: imageUrlResult, breed, sex, userId };
 
-        const response = await fetch(`${SERVER_URL}/pets`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(petData),
-        });
+      const response = await fetch(`${SERVER_URL}/pets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(petData),
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to add pet');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to add pet');
+      }
 
-        Alert.alert("Success", "Pet added successfully!");
-        resetForm();
+      Alert.alert(
+        'Success',
+        'Pet added successfully!',
+        [
+          { 
+            text: 'OK', 
+            onPress: () => {
+              navigation.navigate('DashboardScreen');
+              resetForm();
+            }
+          }
+        ]
+      );
+ 
     } catch (error) {
-        console.error("Error: ", error);
-        Alert.alert("Error", "There was an error adding your pet.");
+      console.error("Error: ", error);
+      Alert.alert("Error", "There was an error adding your pet.");
     } finally {
-        setIsLoading(false);
+      setLoading(false);
     }
-};
+  };
 
-const resetForm = () => {
+  const resetForm = () => {
     setName('');
     setImageUrl(null);
-    setBirthDate(new Date()); // Reset the birthDate as well
-};
-
+    setBirthDate(new Date()); 
+  };
 
   const handleDeleteImage = () => {
-    setImageUrl(null); // Remove the imageUri
+    setImageUrl(null); 
   };
 
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || birthdate;
     setBirthDate(currentDate);
   };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

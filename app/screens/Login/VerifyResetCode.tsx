@@ -1,15 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-    View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert,
-    ScrollView
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert, ScrollView} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
 import Header from '../../components/Header';
-import withDefaultMargins from '../../utils/Margins';
+import withDefaultMargins from '../../assets/Margins';
 import { useLoginStyles } from './styles';
 import { SERVER_URL } from '../../utils/consts';
-import { primary } from '../../utils/colors';
+import { primary } from '../../assets/colors';
 
 const VerifyResetCode = () => {
     const navigation = useNavigation();
@@ -18,7 +14,7 @@ const VerifyResetCode = () => {
     const [resetCode, setResetCode] = useState(Array(6).fill(''));
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [timeLeft, setTimeLeft] = useState(60); // Timer starts at 60 seconds
+    const [timeLeft, setTimeLeft] = useState(60); 
     const [allowResend, setAllowResend] = useState(false);
     const styles = useLoginStyles();
     const inputRefs = useRef(resetCode.map(() => React.createRef()));
@@ -36,10 +32,11 @@ const VerifyResetCode = () => {
             const fullCode = resetCode.join('');
             const response = await fetch(`${SERVER_URL}/users/verify-reset-code`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, resetCode: fullCode }),
             });
             const data = await response.json();
+            console.log(data);
             if (response.ok) {
                 navigation.navigate('ResetPassword', { email });
             } else {
@@ -52,6 +49,7 @@ const VerifyResetCode = () => {
             setLoading(false);
         }
     };
+    
 
     const resendResetCode = async () => {
         if (!allowResend) return;

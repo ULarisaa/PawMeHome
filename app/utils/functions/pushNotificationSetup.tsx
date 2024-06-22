@@ -1,8 +1,43 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Register for push notifications and get the token
+const NotificationTokenContext = createContext({
+  expoPushToken: null,
+  setExpoPushToken: () => {}
+});
+
+export const useNotificationToken = () => useContext(NotificationTokenContext);
+
+export const NotificationTokenProvider = ({ children }) => {
+  const [expoPushToken, setExpoPushToken] = useState(null);
+
+  useEffect(() => {
+    const loadAndRegisterToken = async () => {
+      let storedToken = await loadTokenFromStorage();
+      if (!storedToken) {
+        storedToken = await registerForPushNotificationsAsync();
+      }
+      setExpoPushToken(storedToken);
+    };
+
+    loadAndRegisterToken();
+  }, []);
+
+  const value = {
+    expoPushToken,
+    setExpoPushToken
+  };
+
+  return (
+    <NotificationTokenContext.Provider value={value}>
+      {children}
+    </NotificationTokenContext.Provider>
+  );
+};
+
+
 async function registerForPushNotificationsAsync() {
   if (!Device.isDevice) {
     alert('Must use a physical device for Push Notifications');
@@ -20,7 +55,7 @@ async function registerForPushNotificationsAsync() {
     return;
   }
 
-  const projectId = '7dc185ec-fe57-4bd6-afc1-dd4f7aa6eb43';
+  const projectId = 'ee34fa71-e4ef-4763-bf04-0294bc7643a2';
   const token = (await Notifications.getExpoPushTokenAsync({
     projectId: projectId
   })).data;
@@ -28,7 +63,7 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-// Save token to AsyncStorage
+
 async function saveTokenToStorage(token) {
   try {
     await AsyncStorage.setItem('expoPushToken', token);
@@ -37,7 +72,7 @@ async function saveTokenToStorage(token) {
   }
 }
 
-// Load the token from AsyncStorage
+
 async function loadTokenFromStorage() {
   try {
     return await AsyncStorage.getItem('expoPushToken');

@@ -1,7 +1,6 @@
-// styles.ts
 import { StyleSheet } from 'react-native';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import { Colors, primary } from '../../utils/colors';
+import { Colors, primary } from '../../assets/colors';
 
 export const usePetProfileStyles = () => {
   const scheme = useColorScheme();
@@ -9,6 +8,20 @@ export const usePetProfileStyles = () => {
   const styles = StyleSheet.create({
     container: {
       alignItems: 'center',
+      backgroundColor: Colors[scheme].background,
+    },
+    textinvisible:{
+      color: Colors[scheme].background,
+    },
+    buttonEnabled: {
+      backgroundColor: 'gray', 
+  },
+  buttonDisabled: {
+      backgroundColor: primary,
+  },
+    containerSettings: {
+      marginTop:10,
+      flex: 1,
       backgroundColor: Colors[scheme].background,
     },
     pickerTitle: {
@@ -25,20 +38,27 @@ export const usePetProfileStyles = () => {
       color: Colors[scheme].text,
 
     },
-    
-    input: {
-      width: '100%',
-      fontSize:16,
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 5,
-      padding: 12,
-      backgroundColor: Colors[scheme].inputBackground, // Adaugă fundal pentru input
-      color: Colors[scheme].text, // Și textul inputului să urmărească schema
+    label: {
+      marginTop: 16,
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: Colors[scheme].text,
+      marginBottom:10,
     },
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 13,
+    backgroundColor: Colors[scheme].inputBackground, 
+    color: Colors[scheme].text, 
+    marginBottom:10,
+  },
+ 
     inputDetails: {
-      // Stiluri pentru inputul de detalii, care permite mai multe linii
-      minHeight: 100, // Înălțimea minimă inițială, ajustabilă în funcție de conținut
+
+      minHeight: 100, 
       borderColor: 'gray',
       borderWidth: 1,
       marginTop: 8,
@@ -46,9 +66,9 @@ export const usePetProfileStyles = () => {
       borderRadius: 5,
       padding: 12,
       fontSize:16,
-      textAlignVertical: 'top', // Pentru ca textul să înceapă de sus
-      backgroundColor: Colors[scheme].inputBackground, // Adaugă fundal pentru input
-      color: Colors[scheme].text, // Și textul inputului să urmărească schema
+      textAlignVertical: 'top', 
+      backgroundColor: Colors[scheme].inputBackground, 
+      color: Colors[scheme].text, 
     },
     picker: {
       width: '80%',
@@ -68,10 +88,16 @@ export const usePetProfileStyles = () => {
       fontWeight: 'bold',
       color: Colors[scheme].text,
     },
-    createtext: {
+    text: {
+      color: Colors[scheme].text,
+      marginLeft: 10,
+      fontSize: 16,
+    },
+    createText: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#FFFFFF',
+      color: Colors[scheme].text,
+      textAlign:'center',
     },
     description: {
       fontSize: 18,
@@ -80,31 +106,31 @@ export const usePetProfileStyles = () => {
       color: Colors[scheme].textBox,
     },
     mapContainer: {
+      marginTop:10,
       width: '100%',
-      height: 400,
+      height: '70%',
       borderRadius: 20,
       overflow: 'hidden',
       marginBottom: 20,
     },
-    distanceText: {
-      fontSize: 16, // De exemplu, mărimea fontului
-    },
+  
     map: {
       ...StyleSheet.absoluteFillObject,
     },
     buttonsRow: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
+
       marginVertical: 10,
     },
     button: {
       flex: 1, 
       justifyContent: 'center',
       alignItems: 'center',
-      paddingVertical: 10, // Ajustează în funcție de necesități
+      paddingVertical: 10, 
+      color: Colors[scheme].text, 
     },
     activeButton: {
-      borderBottomWidth: 2, // Lățimea liniei de subliniere
+      borderBottomWidth: 2, 
       borderBottomColor: primary,
     },
     buttonText: {
@@ -113,35 +139,45 @@ export const usePetProfileStyles = () => {
     selectedButtonText: {
       color: primary,
     },
+    selectedButton: {
+      borderBottomWidth: 2,
+      borderBottomColor: primary,
+    },
     settingsContainer: {
       flex: 1,
       alignItems: 'center',
       padding: 20,
     },
     eventItem: {
-      backgroundColor: '#f9f9f9', // Fundal deschis pentru fiecare element de eveniment
+      backgroundColor: '#f9f9f9', 
       padding: 10,
-      marginVertical: 5, // Spațiu vertical între elementele listei
+      marginVertical: 5, 
       borderRadius: 5,
-      flexDirection: 'row', // Afișează data și descrierea evenimentului pe aceeași linie
-      justifyContent: 'space-between', // Maximizarea spațiului între data și descrierea evenimentului
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
     },
     eventDate: {
       fontWeight: 'bold',
     },
     eventDescription: {
-      color: '#333', // O nuanță mai închisă pentru text
+      color: '#333', 
     },
     create: {
       backgroundColor: primary,
       padding: 15,
       borderRadius: 5,
-      marginVertical: 10, // Spațiu vertical între butoane
-      width: '100%', // Butonul va ocupa lățimea containerului minus padding
-      alignItems: 'center', // Centrează textul pe orizontală
+      marginVertical: 10, 
+      width: '100%', 
+      alignItems: 'center', 
     },
     createEventButton: {
       color: primary,
+      marginLeft:20,
+      marginRight:20,
+    },
+    attachButton: {
+      color: primary,
+      textAlign:'center',
     },
     inputIOS: {
       fontSize: 16,
@@ -151,7 +187,7 @@ export const usePetProfileStyles = () => {
       borderColor: 'gray',
       borderRadius: 4,
       color: Colors[scheme].text,
-      paddingRight: 30, // pentru a se asigura că textul nu se suprapune peste iconița de jos
+      paddingRight: 30,
     },
     inputAndroid: {
       fontSize: 16,
@@ -161,7 +197,7 @@ export const usePetProfileStyles = () => {
       borderColor: 'gray',
       borderRadius: 8,
       color: Colors[scheme].text,
-      paddingRight: 30, // pentru a se asigura că textul nu se suprapune peste iconița de jos
+      paddingRight: 30, 
     },
     eventTypeButton: {
       alignItems: 'center',
@@ -172,24 +208,24 @@ export const usePetProfileStyles = () => {
     sectionHeader: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: '#333', // Darker text for better readability
+      color: '#333',
       marginTop: 20,
       marginBottom: 10,
     },
     eventItemList: {
-      backgroundColor: '#ffffff', // White background for event items
+      backgroundColor: '#ffffff', 
       padding: 15,
       borderRadius: 5,
-      shadowColor: '#000', // Shadow for depth
+      shadowColor: '#000', 
       shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.1,
       shadowRadius: 3,
-      elevation: 4, // Elevation for Android
-      marginBottom: 10, // Space between event items
+      elevation: 4, 
+      marginBottom: 10, 
     },
     eventDateList: {
       fontSize: 16,
-      color: '#666', // Lighter text for the date
+      color: '#666', 
       marginBottom: 5,
     },
     eventInfo: {
@@ -205,7 +241,7 @@ export const usePetProfileStyles = () => {
     eventDetails: {
       marginTop: 5,
       fontSize: 16,
-      color: '#555', // Detail text color
+      color: '#555', 
     },
     card: {
       backgroundColor: '#fff',
@@ -221,7 +257,7 @@ export const usePetProfileStyles = () => {
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between', // Acesta va împinge elementele la extremități
+      justifyContent: 'space-between',
       marginBottom: 10,
     },
     
@@ -255,18 +291,40 @@ export const usePetProfileStyles = () => {
     },
     dayRow: {
       flexDirection: 'row',
-      justifyContent: 'space-between', // This ensures the text and switch are on opposite ends
-      alignItems: 'center', // This centers them vertically
-      paddingVertical: 5, // Adds vertical padding for better spacing
-      paddingHorizontal: 20, // Adds horizontal padding for better spacing
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      paddingVertical: 5,
+      paddingHorizontal: 20, 
     },
     dayLabel: {
-      flex: 1, // Takes all available space pushing the switch to the end
-      fontSize: 16, // Example font size, adjust as needed
+      flex: 1,
+      fontSize: 16, 
       color: Colors[scheme].text,
     },
-    
-    
+    Container: {
+      padding: 10,
+      backgroundColor: '#f0f0f0',
+      borderRadius: 8,
+      marginVertical: 10,
+    },
+    infoContainer: {
+      marginBottom: 10,
+    },
+    infoItem: {
+      marginBottom: 5,
+    },
+    infoText: {
+      fontWeight: 'bold',
+    },
+    distanceText: {
+      fontSize: 16,
+    },
+    safeText: {
+      color: 'green',
+    },
+    notSafeText: {
+      color: 'red',
+    },
   });
 
   return styles;

@@ -1,50 +1,62 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import CircularBox from '../../components/CircularBox/CircularBox';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Header from '../../components/Header';
-import LoadingScreen from '../../utils/functions/Loading/Loading';
-import withDefaultMargins from '../../utils/Margins';
+import LoadingScreen from '../../components/Loading/Loading';
+import withDefaultMargins from '../../assets/Margins';
 import { useAuth } from '../../utils/functions/AuthContext';
 import { useDashboardStyles } from './styles';
 import { SERVER_URL } from '../../utils/consts';
 
 const Dashboard = () => {
-  const { currentUser, loading, setLoading } = useAuth(); // Assume setLoading is also provided by context if needed
+  const { currentUser, loading, setLoading } = useAuth();
   const navigation = useNavigation();
   const [pets, setPets] = useState([]);
   const styles = useDashboardStyles();
 
-  const fetchPets = useCallback(async () => {
-    if (!currentUser || !currentUser.token) {
-      console.error("User is not authenticated");
-      return;
-    }
-
+  const fetchPetsByUser = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${SERVER_URL}/pets`, {
-        method: 'GET',
-       
+      const responseToken = await fetch(`${SERVER_URL}/users/decodeToken`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: currentUser.token }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!responseToken.ok) {
+        throw new Error('Failed to decode token');
       }
 
-      const petsArray = await response.json();
+      const { userId } = await responseToken.json();
+      const responsePets = await fetch(`${SERVER_URL}/pets/getByUserId/${userId}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+      
+      if (!responsePets.ok) {
+        throw new Error(`HTTP error! status: ${responsePets.status}`);
+      }
+
+      const petsArray = await responsePets.json();
       setPets(petsArray);
     } catch (error) {
-      console.error('Failed to fetch pets:', error);
+      console.error('Failed to fetch pets by user:', error);
     } finally {
       setLoading(false);
     }
-  }, [currentUser, setLoading]);
-
-  useEffect(() => {
-    fetchPets();
-  }, [fetchPets]); // Effectively calls fetchPets when the component mounts and whenever fetchPets updates
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPetsByUser();
+    }, [currentUser.token])
+  );
   
+
+
   if (loading) {
     return <LoadingScreen />;
   }

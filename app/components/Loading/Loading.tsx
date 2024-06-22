@@ -3,20 +3,20 @@ import { Animated, View, Image, StyleSheet } from 'react-native';
 import { useDynamicStyles } from './styles';
 
 const LoadingScreen = () => {
-    const styles = useDynamicStyles(); // Folosește hook-ul pentru a obține stilurile adaptate
-    const [fillAnimation] = useState(new Animated.Value(0)); // Starts empty
+    const styles = useDynamicStyles(); 
+    const [fillAnimation] = useState(new Animated.Value(0)); 
 
     useEffect(() => {
-        // Sequence: Fill down, then disappear upwards
+
         const animationSequence = Animated.sequence([
             Animated.timing(fillAnimation, {
-                toValue: 1, // Fill down
-                duration: 1500, // Duration 3 seconds
+                toValue: 1, 
+                duration: 1500, 
                 useNativeDriver: false, 
             }),
             Animated.timing(fillAnimation, {
-                toValue: 0, // Disappear upwards
-                duration: 1500, // Duration 3 seconds
+                toValue: 0, 
+                duration: 1500, 
                 useNativeDriver: false,
             }),
         ]);
@@ -34,7 +34,7 @@ const LoadingScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.logoContainer}>
-                <Image source={require('../../images/paw.png')} style={styles.logo} />
+                <Image source={require('../../assets/images/paw.png')} style={styles.logo} />
                 <Animated.View style={[styles.cover, { height: coverHeight }]} />
             </View>
         </View>

@@ -1,37 +1,61 @@
 {
   "expo": {
     "name": "PawMeHome",
-    "slug": "pawmehome",
-    "projectId": "7dc185ec-fe57-4bd6-afc1-dd4f7aa6eb43",
+    "slug": "pawmehome-dpopnk0silgc4oykwjeqv",
+    "projectId": "ee34fa71-e4ef-4763-bf04-0294bc7643a2",
     "owner": "larisau10",
     "scheme": "pawmehome",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "icon": "./app/utils/images/paw.png",
+    "icon": "./app/assets/images/paw.png",
     "splash": {
-      "image": "./app/utils/images/paw.png",
-      "resizeMode": "contain", 
+      "image": "./app/assets/images/paw.png",
+      "resizeMode": "contain"
     },
-    "assetBundlePatterns": ["**/*"],
-    "platforms": ["ios", "android", "web"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.app.PawMeHome",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app requires your location to show you nearby points of interest.",
-        "CFBundleURLTypes": [{
-          "CFBundleURLSchemes": ["com.googleusercontent.apps.27946158150-avc5iefheitgdejtv5os4i5p09jbhpfp"]
-        }]
-      },
-      
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.27946158150-avc5iefheitgdejtv5os4i5p09jbhpfp"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "package": "com.app.PawMeHome",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ee34fa71-e4ef-4763-bf04-0294bc7643a2"
+      }
     }
   }
 }

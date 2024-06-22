@@ -1,12 +1,56 @@
-// NotificationsStyles.ts
 import { StyleSheet } from 'react-native';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import { Colors, primary } from '../../utils/colors';
+import { Colors, primary } from '../../assets/colors';
 
 export const useNotificationStyles = () => {
   const scheme = useColorScheme();
 
   const styles = StyleSheet.create({
+    highlightedNotification: {
+      backgroundColor: '#d3f8d3', 
+    },
+
+      modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
+      modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        width: '80%',
+      },
+      petIconContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+      },
+      modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign:'center',
+      },
+      modalTimestamp: {
+        marginBottom: 25,
+      },
+      closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+      },
+      deleteButton: {
+  
+        bottom: 10,
+        width: '100%',
+        alignItems: 'center',
+      },
+      detailsContainer: {
+        marginBottom: 20,
+      },
+     
+    
     container: {
       marginTop:10,
       flex: 1,
@@ -16,9 +60,9 @@ export const useNotificationStyles = () => {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: Colors[scheme].box,
-      padding: 8, // Ajustat pentru a controla spațiul din interiorul containerului
-      marginBottom: 12, // Mărit pentru a adăuga spațiu între elemente
-      marginHorizontal: 8, // Adaugă o margine laterală pentru a lasa spațiu la marginile ecranului
+      padding: 8, 
+      marginBottom: 12, 
+      marginHorizontal: 8, 
       borderRadius: 10,
     },
     notificationContent: {

@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert, Button,
-    ScrollView
-} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Alert, ScrollView} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import Header from '../../components/Header';
-import withDefaultMargins from '../../utils/Margins';
+import withDefaultMargins from '../../assets/Margins';
 import { useLoginStyles } from './styles';
 import { SERVER_URL } from '../../utils/consts';
-import { primary } from '../../utils/colors';
+import { primary } from '../../assets/colors';
 
 const VerifySignUpCode = () => {
     const navigation = useNavigation();
@@ -18,7 +15,7 @@ const VerifySignUpCode = () => {
     const [verificationCode, setVerificationCode] = useState(Array(6).fill(''));
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [timeLeft, setTimeLeft] = useState(60);  // Timer starts at 60 seconds
+    const [timeLeft, setTimeLeft] = useState(60);  
     const [allowResend, setAllowResend] = useState(false);
     const styles = useLoginStyles();
     const inputRefs = useRef(verificationCode.map(() => React.createRef()));
@@ -30,41 +27,40 @@ const VerifySignUpCode = () => {
     }, [timeLeft]);
 
     const handleVerifyCode = async () => {
-        // Check if the verificationCode array contains any empty strings
+ 
         if (verificationCode.includes('')) {
             Alert.alert('Incomplete Code', 'Please fill in all the code fields.');
             return;
         }
-        setLoading(true); // Display a loading spinner or similar loading indicator
-        setError(''); // Clear any previous errors
+        setLoading(true); 
+        setError(''); 
     
         try {
-            const fullCode = verificationCode.join(''); // Combine array elements into a single string
-            console.log('start', verificationCode); // Log the code for debugging
+            const fullCode = verificationCode.join(''); 
+            console.log('start', verificationCode); 
             const response = await fetch(`${SERVER_URL}/users/verify-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, code: fullCode }), // Send email and code to server
+                body: JSON.stringify({ email, code: fullCode }), 
             });
     
-            const data = await response.json(); // Parse JSON response from the server
+            const data = await response.json(); 
     
             if (!response.ok) {
                 throw new Error(data.message || 'Invalid or expired verification code');
             }
-    
-            // Display a success message and navigate to the HomeTabs screen
+
             Alert.alert('Success', data.message, [
                 {
                     text: 'OK',
-                    onPress: () => navigation.navigate('HomeTabs') // Navigate when user taps OK
+                    onPress: () => navigation.navigate('Login') 
                 }
             ]);
         } catch (error) {
-            setError(error.message); // Set error message to display in the UI
-            Alert.alert('Error', error.message); // Display an alert with the error message
+            setError(error.message); 
+            Alert.alert('Error', error.message); 
         } finally {
-            setLoading(false); // Hide loading indicator
+            setLoading(false); 
         }
     };
     

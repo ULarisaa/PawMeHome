@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors } from '../../utils/colors';
+import { Colors } from '../../assets/colors';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
 
 export const useDashboardStyles = () => {

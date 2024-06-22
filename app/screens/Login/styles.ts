@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import { Colors, primary } from '../../utils/colors';
+import { Colors, primary } from '../../assets/colors';
 
 export const useLoginStyles = () => {
   const scheme = useColorScheme(); 
@@ -8,7 +8,6 @@ export const useLoginStyles = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: Colors[scheme].background,
     },
@@ -27,6 +26,7 @@ export const useLoginStyles = () => {
       borderRadius: 5,
       backgroundColor: Colors[scheme].inputBackground,
       color: Colors[scheme].text,
+      
     },
     button: {
       marginTop: 20,
@@ -64,7 +64,7 @@ export const useLoginStyles = () => {
     marginTop:20,
     paddingHorizontal: 20,
     borderRadius: 5,
-    alignItems: 'center', // Center the text inside the button
+    alignItems: 'center', 
     justifyContent: 'center',
 },
 
@@ -108,12 +108,12 @@ textDisabled: {
       backgroundColor: '#EEEEEE',
     },
     codeInput: {
-      width: 40,  // Lățimea fiecărui input pentru a se potrivi unei cifre
-      borderBottomWidth: 2,  // Subliniază fiecare căsuță pentru un aspect curat
+      width: 40,  
+      borderBottomWidth: 2,  
       borderColor: 'gray',
       textAlign: 'center',
-      fontSize: 18,  // Mărește fontul pentru lizibilitate
-      marginHorizontal: 5,  // Spațiu între căsuțe
+      fontSize: 18,  
+      marginHorizontal: 5, 
       color: Colors[scheme].text,
   },
   

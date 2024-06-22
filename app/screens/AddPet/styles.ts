@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import { Colors, primary } from '../../utils/colors';
+import { Colors, primary } from '../../assets/colors';
 
 export const usePetsStyles = () => {
   const scheme = useColorScheme();
@@ -10,7 +10,7 @@ export const usePetsStyles = () => {
       flex: 1,
       justifyContent: 'center',
       padding: 20,
-      backgroundColor: Colors[scheme].background, // Aici era greșeala
+      backgroundColor: Colors[scheme].background, 
     },
     buttonsRow: {
       flexDirection: 'row',
@@ -37,8 +37,8 @@ export const usePetsStyles = () => {
       borderColor: '#ddd',
       borderRadius: 5,
       padding: 13,
-      backgroundColor: Colors[scheme].inputBackground, // Adaugă fundal pentru input
-      color: Colors[scheme].text, // Și textul inputului să urmărească schema
+      backgroundColor: Colors[scheme].inputBackground, 
+      color: Colors[scheme].text, 
     },
     imageContainer: {
       position: 'relative',
@@ -69,7 +69,7 @@ export const usePetsStyles = () => {
       flex: 1, 
       justifyContent: 'center',
       alignItems: 'center',
-      paddingVertical: 10, // Ajustează în funcție de necesități
+      paddingVertical: 10, 
     },
     createEventButton: {
       color: primary,
@@ -82,9 +82,32 @@ export const usePetsStyles = () => {
     textinvisible:{
       color: Colors[scheme].background,
     },
-  
+    unitContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding:10
+    },
+    unitText: {
+      fontSize: 18,
+      marginLeft: 10,
+      color: Colors[scheme].text,
+    },
+    selectedUnit: {
+      color: primary,
+    },
+    switchLabel: {
+      fontSize: 16,
+      marginRight: 10,
+    },
+    pickerTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: Colors[scheme].text,
+      marginTop: 16,
+      marginBottom: 10,
+    },
+    
       
-
   });
 
   return styles;

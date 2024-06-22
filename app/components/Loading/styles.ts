@@ -1,10 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { useColorScheme } from '../../ColorSchemeContext';
-import { Colors } from '../../colors';
+import { useColorScheme } from '../../utils/ColorSchemeContext';
+import { Colors } from '../../assets/colors';
 
 export const useDynamicStyles = () => {
     const scheme = useColorScheme();
-    // Folosește 'light' ca fallback dacă scheme este null sau undefined
     const backgroundColor = Colors[scheme].background;
     
 

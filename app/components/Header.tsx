@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import { useColorScheme } from '../utils/ColorSchemeContext';
-import lightLogo from '../utils/images/white_logo.png'
-import darkLogo from '../utils/images/black_logo.png'
+import lightLogo from '../assets/images/white_logo.png';
+import darkLogo from '../assets/images/black_logo.png';
+
+const { width, height } = Dimensions.get('window'); 
 
 const LogoHeader = () => {
-  const scheme = useColorScheme(); // Obținem schema de culori curentă
-  const logo = scheme === 'dark' ? darkLogo : lightLogo; // Alege logo-ul în funcție de tema
+  const scheme = useColorScheme();
+  const logo = scheme === 'dark' ? darkLogo : lightLogo; 
 
   return (
     <View style={styles.container}>
@@ -17,14 +19,14 @@ const LogoHeader = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 170, // Ajustează înălțimea după necesitate
+    height: height * 0.2, 
     alignItems: 'center',
     justifyContent: 'center',
   },
   logo: {
-    width: 400, // Ajustează lățimea conform raportului de aspect al logo-ului
-    height: 180, // Ajustează înălțimea conform raportului de aspect al logo-ului
-    resizeMode: 'contain', // Asigură scalarea frumoasă a logo-ului
+    width: width * 0.8, 
+    height: width * 0.4, 
+    resizeMode: 'contain', 
   },
 });
 

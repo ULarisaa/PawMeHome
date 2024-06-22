@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-// Obțineți dimensiunile ecranului pentru a centra modalul
 const { width } = Dimensions.get('screen');
 
 interface UploadModalProps {
@@ -86,7 +85,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    width: width - 40, // Ajustează aceasta în funcție de cât de larg vrei să fie modalul
+    width: width - 40, 
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,

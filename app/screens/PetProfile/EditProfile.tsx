@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Alert, Image, TouchableOpacity, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Keyboard, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import UploadModal from '../../utils/functions/UploadModal';
+import UploadModal from '../../components/UploadModal';
 import { usePetsStyles } from '../AddPet/styles';
-import { Colors, primary } from '../../utils/colors';
+import { Colors, primary } from '../../assets/colors';
 import { useColorScheme } from '../../utils/ColorSchemeContext';
-import withDefaultMargins from '../../utils/Margins';
+import withDefaultMargins from '../../assets/Margins';
 import { SERVER_URL } from '../../utils/consts';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -27,7 +27,7 @@ const EditPet = ({ route }) => {
   const [initialData, setInitialData] = useState(null);
 
   const checkIfDirty = (newValue, fieldName) => {
-    if (!initialData) return; // Dacă datele inițiale nu sunt încă setate, ieșim
+    if (!initialData) return; 
     const isDirty = Object.entries(initialData).some(([key, value]) => {
       if (key === fieldName) {
         return newValue.toString() !== value.toString();
@@ -69,8 +69,8 @@ const EditPet = ({ route }) => {
         setImageUrl(data.imageurl);
         setSex(data.sex);
         setBreed(data.breed);
-        setInitialData(data); // Setăm datele inițiale pentru comparație
-        setIsDirty(false); // Resetăm starea 'isDirty' la încărcarea datelor
+        setInitialData(data); 
+        setIsDirty(false); 
       } catch (error) {
         console.error("Error fetching pet details:", error);
       }
@@ -80,7 +80,7 @@ const EditPet = ({ route }) => {
   }, [petId]);
 
   const handleSubmit = async () => {
-    if (isLoading) return; // Previne multiple submit-uri simultan
+    if (isLoading) return;
     if (!name || !birthdate || !sex || !breed || !imageUrl) {
       Alert.alert("Error", "Please fill all the fields.");
       return;
@@ -101,7 +101,7 @@ const EditPet = ({ route }) => {
       Alert.alert("Success", "Pet updated successfully!", [
         {
           text: "OK",
-          onPress: () => navigation.navigate('DashboardScreen'), // Replace 'Dashboard' with the actual route name of your dashboard screen
+          onPress: () => navigation.navigate('DashboardScreen'), 
         },
       ]);
     } catch (error) {
@@ -142,7 +142,7 @@ const EditPet = ({ route }) => {
             onPress={handleSubmit}
             disabled={!isDirty || !name || !sex || !birthdate}
             style={[styles.button, {
-                // Dacă formularul nu este dirty sau câmpurile obligatorii nu sunt completate, butonul este mai puțin vizibil
+               
                 opacity: (!isDirty || !name || !sex || !birthdate) ? 0.3 : 1
             }]}
             >
@@ -197,7 +197,7 @@ const EditPet = ({ route }) => {
             {!imageUrl && (
                 <View>
                     <Text style={styles.label}>Select a profile image:</Text>
-                    <Button title="Select Image" color={primary} onPress={() => {/* Aici ar trebui să deschizi modalul pentru a selecta o imagine și apoi să apelezi handleImageChange cu URL-ul imaginii selectate */}} />
+                    <Button title="Select Image" color={primary} onPress={() => setModalVisible(true)} />
                 </View>
                 )}
 
@@ -206,13 +206,13 @@ const EditPet = ({ route }) => {
                 <Image source={{ uri: imageUrl }} style={styles.image} />
                 <TouchableOpacity
                   style={[styles.icon, styles.editIcon]}
-                  onPress={() => setModalVisible(true)} // Deschide modalul pentru selectarea imaginii
+                  onPress={() => setModalVisible(true)} 
                 >
                   <MaterialIcons name="edit" size={24} color={Colors[scheme].text} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.icon, styles.deleteIcon]}
-                  onPress={handleDeleteImage} // Șterge imaginea curentă
+                  onPress={handleDeleteImage} 
                 >
                   <MaterialIcons name="delete" size={24} color={Colors[scheme].text} />
                 </TouchableOpacity>
@@ -224,8 +224,8 @@ const EditPet = ({ route }) => {
      isVisible={modalVisible}
      onClose={() => setModalVisible(false)}
      onImageSelect={(imageUrl) => {
-        handleImageChange(imageUrl); // Aici actualizezi imaginea și verifici dacă formularul este dirty
-        setModalVisible(false); // Închide modalul după selecție
+        handleImageChange(imageUrl);
+        setModalVisible(false); 
       }}
    />
    </View>
